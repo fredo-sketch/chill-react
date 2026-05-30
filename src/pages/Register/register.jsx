@@ -27,7 +27,7 @@ const Register = () => {
     localStorage.setItem("userAccount", JSON.stringify(dataAkun));
 
     alert("Pendaftaran berhasil! Silakan login.");
-    navigate("/login"); // Lempar user otomatis ke halaman login
+    navigate("/login");
   };
 
   return (

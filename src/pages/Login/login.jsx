@@ -22,7 +22,7 @@ const Login = () => {
     if (username === savedAccount.username && password === savedAccount.password) {
       localStorage.setItem("isLoggedIn", "true");
       alert("Login berhasil! Selamat datang kembali.");
-      navigate("/"); // Lempar user ke halaman beranda setelah login sukses
+      navigate("/");
     } else {
       alert("Username atau password salah!");
     }
