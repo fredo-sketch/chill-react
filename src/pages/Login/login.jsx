@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useOutletContext, useNavigate } from "react-router";
-import logoChill from "../../assets/images/logo.svg";
+import logoChill from "../../assets/images/Logo.svg";
 import bgLogin from "../../assets/images/bg-masuk.jpg";
 import google from "../../assets/images/google.svg";
 import eye from "../../assets/images/eye-off.svg";
