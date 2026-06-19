@@ -86,21 +86,31 @@ const FOOTER_GENRES = [
 
 const FOOTER_BANTUAN = ["FAQ", "Kontak Kami", "Privasi", "Syarat & Ketentuan"];
 
-const MovieCard = ({ src, alt }) => (
-  <img
-    src={src}
-    alt={alt}
-    className="rounded-lg cursor-pointer transition-transform duration-300 hover:scale-105 object-cover shrink-0 shadow-md"
-    style={{ height: "160px", width: "110px" }}
-    onError={(e) => {
-      e.target.onerror = null;
-      e.target.src =
-        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='110' height='160' viewBox='0 0 110 160'><rect width='110' height='160' fill='%2327272a'/><text x='50%27 y='50%27 font-size='10' fill='%2371717a' font-family='sans-serif' text-anchor='middle' alignment-baseline='middle'>Image Missing</text></svg>";
-    }}
-  />
+const MovieCard = ({ src, alt, onDelete, onUpdate }) => (
+  <div className="relative group/card shrink-0">
+    <img
+      src={src}
+      alt={alt}
+      className="rounded-lg cursor-pointer transition-transform duration-300 hover:scale-105 object-cover shadow-md"
+      style={{ height: "160px", width: "110px" }}
+      onError={(e) => {
+        e.target.onerror = null;
+        e.target.src =
+          "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='110' height='160' viewBox='0 0 110 160'><rect width='110' height='160' fill='%2327272a'/><text x='50%27 y='50%27 font-size='10' fill='%2371717a' font-family='sans-serif' text-anchor='middle' alignment-baseline='middle'>Image Missing</text></svg>";
+      }}
+    />
+    <div className="absolute top-1 right-1 hidden group-hover/card:flex gap-1">
+      <button onClick={onUpdate} className="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">
+        ✎
+      </button>
+      <button onClick={onDelete} className="bg-red-600 text-white text-xs px-1.5 py-0.5 rounded">
+        ✕
+      </button>
+    </div>
+  </div>
 );
 
-const MovieSection = ({ title, items, scrollable }) => {
+const MovieSection = ({ title, items, scrollable, sectionId, onDelete, onUpdate }) => {
   const scrollRef = useRef(null);
 
   const scroll = (dir) => {
@@ -125,7 +135,7 @@ const MovieSection = ({ title, items, scrollable }) => {
 
         <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-3 scrollbar-none" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
           {items.map((item) => (
-            <MovieCard key={item.id} src={item.src} alt={item.alt} />
+            <MovieCard key={item.id} src={item.src} alt={item.alt} onDelete={() => onDelete(sectionId, item.id)} onUpdate={() => onUpdate(sectionId, item.id, { alt: "Judul Baru" })} />
           ))}
         </div>
 
@@ -145,6 +155,46 @@ const MovieSection = ({ title, items, scrollable }) => {
 const Home = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [muted, setMuted] = useState(true);
+  const [sections, setSections] = useState(SECTIONS);
+
+  //Add
+  const handleAddMovie = (sectionId, newMovie) => {
+    const copySections = [...sections];
+    const targetSection = copySections.find((sec) => sec.id === sectionId);
+    if (targetSection) {
+      const filmBaruLengkap = {
+        id: Date.now(),
+        src: newMovie.src,
+        alt: newMovie.alt,
+      };
+      targetSection.items.push(filmBaruLengkap);
+    }
+    setSections(copySections);
+  };
+
+  //Delete
+  const handleDeleteMovie = (sectionId, movieId) => {
+    const copySections = [...sections];
+    const targetSection = copySections.find((sec) => sec.id === sectionId);
+    if (targetSection) {
+      const filmSisa = targetSection.items.filter((item) => item.id !== movieId);
+      targetSection.items = filmSisa;
+    }
+    setSections(copySections);
+  };
+
+  //Update
+  const handleUpdateMovie = (sectionId, movieId, updatedData) => {
+    const copySections = [...sections];
+    const targetSection = copySections.find((rak) => rak.id === sectionId);
+    if (targetSection) {
+      const targetMovie = targetSection.items.find((film) => film.id === movieId);
+      if (targetMovie) {
+        Object.assign(targetMovie, updatedData);
+      }
+    }
+    setSections(copySections);
+  };
 
   useEffect(() => {
     const status = localStorage.getItem("isLoggedIn");
@@ -213,8 +263,26 @@ const Home = () => {
           </header>
 
           <main className="px-6 md:px-16 pt-4 pb-12 relative z-20">
-            {SECTIONS.map((section) => (
-              <MovieSection key={section.id} title={section.title} items={section.items} scrollable={section.scrollable} />
+            <div className="mb-6 p-4 bg-zinc-900 rounded-lg max-w-sm border border-zinc-800">
+              <h3 className="text-sm font-semibold mb-2">Tambah Film Cepat (Melanjutkan Menonton)</h3>
+              <div className="flex gap-2">
+                <input type="text" id="quick-add-input" placeholder="Ketik judul film..." className="bg-zinc-800 text-sm px-3 py-1.5 rounded text-white flex-1 outline-none border border-zinc-700" />
+                <button
+                  onClick={() => {
+                    const input = document.getElementById("quick-add-input");
+                    if (input && input.value.trim()) {
+                      handleAddMovie("melanjutkan", { alt: input.value });
+                      input.value = ""; // Reset kolom input
+                    }
+                  }}
+                  className="bg-[#3254ff] text-xs px-4 py-1.5 rounded font-semibold"
+                >
+                  Tambah
+                </button>
+              </div>
+            </div>
+            {sections.map((section) => (
+              <MovieSection key={section.id} title={section.title} items={section.items} scrollable={section.scrollable} sectionId={section.id} onDelete={handleDeleteMovie} onUpdate={handleUpdateMovie} />
             ))}
           </main>
         </>
