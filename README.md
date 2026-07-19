@@ -1,16 +1,27 @@
-# React + Vite
+# Chill React — Streaming Platform UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Antarmuka (UI) platform streaming media digital bergaya Netflix, dikembangkan sebagai lanjutan dari konsep landing page [landing-page-chill](https://github.com/fredo-sketch/landing-page-chill), kali ini dengan pendekatan komponen React yang lebih dinamis dan interaktif.
 
-Currently, two official plugins are available:
+🔗 **Live Demo:** [chill-react-plum.vercel.app](https://chill-react-plum.vercel.app)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+<!-- Taruh screenshot di sini setelah upload, contoh: -->
+<!-- ![Tampilan Homepage Chill React](./src/assets/screenshot-home.png) -->
 
-## React Compiler
+## 🛠️ Tech Stack
+- React.js (Vite)
+- Tailwind CSS
+- JavaScript (ES6+)
+- Deployed on Vercel
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ Fitur
+- Tampilan katalog konten ala platform streaming (Netflix-style)
+- Komponen React yang reusable dan terstruktur
+- Styling modern & responsif menggunakan Tailwind CSS
 
-## Expanding the ESLint configuration
+## 🎯 Tujuan Project
+Dibuat untuk melatih pengembangan antarmuka dengan React.js, termasuk component-based architecture dan styling utility-first menggunakan Tailwind CSS.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🚀 Cara Menjalankan
+1. Clone repository ini
+2. Install dependencies: `npm install`
+3. Jalankan project: `npm run dev`
