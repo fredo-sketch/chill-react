@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import logoChill from "../assets/images/Logo.svg";
-import profile from "../assets/images/profile.png";
+
+const logoChill = "/images/Logo.svg";
+const profile = "/images/profile.png";
 
 const Navbar = () => {
   const navigate = useNavigate();

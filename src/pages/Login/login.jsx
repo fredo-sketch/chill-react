@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Link, useOutletContext, useNavigate } from "react-router";
-import logoChill from "../../assets/images/Logo.svg";
-import bgLogin from "../../assets/images/bg-masuk.jpg";
-import google from "../../assets/images/google.svg";
-import eye from "../../assets/images/eye-off.svg";
-import eyeOn from "../../assets/images/eye-open.svg";
 import Register from "../Register/register";
+
+const logoChill = "/images/Logo.svg";
+const bgLogin = "/images/bg-masuk.jpg";
+const google = "/images/google-icon.svg";
+const eye = "/images/eye-off.svg";
+const eyeOn = "/images/eye-open.svg";
 
 const Login = () => {
   const [username, setUsername] = useState("");

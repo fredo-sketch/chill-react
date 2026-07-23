@@ -1,24 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import Navbar from "../../components/Navbar";
-import logoChill from "../../assets/images/Logo.svg";
-import highlightImg from "../../assets/images/highlight.png";
-import m1 from "../../assets/images/m-1.png";
-import m2 from "../../assets/images/m-2.png";
-import m3 from "../../assets/images/m-3.png";
-import m4 from "../../assets/images/m-4.png";
-import r1 from "../../assets/images/r-1.png";
-import r2 from "../../assets/images/r-2.png";
-import r3 from "../../assets/images/r-3.png";
-import r4 from "../../assets/images/r-4.png";
-import r5 from "../../assets/images/r-5.png";
-import t1 from "../../assets/images/t-1.png";
-import t2 from "../../assets/images/t-2.png";
-import t3 from "../../assets/images/t-3.png";
-import t4 from "../../assets/images/t-4.png";
-import t5 from "../../assets/images/t-5.png";
-import rb2 from "../../assets/images/rb-2.png";
-import rb5 from "../../assets/images/rb-5.png";
+import { getMovies, addMovie, deleteMovie, updateMovie } from "../../services/movieService";
+
+const logoChill = "/images/Logo.svg";
+const highlightImg = "/images/highlight.png";
 
 const HIGHLIGHT = {
   title: "Duty After School",
@@ -26,56 +12,6 @@ const HIGHLIGHT = {
   bg: highlightImg,
   age: "18+",
 };
-
-const SECTIONS = [
-  {
-    id: "melanjutkan",
-    title: "Melanjutkan Menonton",
-    scrollable: true,
-    items: [
-      { id: 1, src: m1, alt: "Movie 1" },
-      { id: 2, src: m2, alt: "Movie 2" },
-      { id: 3, src: m3, alt: "Movie 3" },
-      { id: 4, src: m4, alt: "Movie 4" },
-    ],
-  },
-  {
-    id: "top-rating",
-    title: "Top Rating Film dan Series Hari ini",
-    scrollable: true,
-    items: [
-      { id: 1, src: r1, alt: "Rating 1" },
-      { id: 2, src: r2, alt: "Rating 2" },
-      { id: 3, src: r3, alt: "Rating 3" },
-      { id: 4, src: r4, alt: "Rating 4" },
-      { id: 5, src: r5, alt: "Rating 5" },
-    ],
-  },
-  {
-    id: "trending",
-    title: "Film Trending",
-    scrollable: true,
-    items: [
-      { id: 1, src: t1, alt: "Trending 1" },
-      { id: 2, src: t2, alt: "Trending 2" },
-      { id: 3, src: t3, alt: "Trending 3" },
-      { id: 4, src: t4, alt: "Trending 4" },
-      { id: 5, src: t5, alt: "Trending 5" },
-    ],
-  },
-  {
-    id: "rilis",
-    title: "Rilis Baru",
-    scrollable: true,
-    items: [
-      { id: 1, src: t5, alt: "Rilis 1" },
-      { id: 2, src: rb2, alt: "Rilis 2" },
-      { id: 3, src: r5, alt: "Rilis 3" },
-      { id: 4, src: r4, alt: "Rilis 4" },
-      { id: 5, src: rb5, alt: "Rilis 5" },
-    ],
-  },
-];
 
 const FOOTER_GENRES = [
   ["Aksi", "Anak-anak", "Anime", "Britania"],
@@ -86,6 +22,7 @@ const FOOTER_GENRES = [
 
 const FOOTER_BANTUAN = ["FAQ", "Kontak Kami", "Privasi", "Syarat & Ketentuan"];
 
+// --- KOMPONEN MOVIE CARD ---
 const MovieCard = ({ src, alt, onDelete, onUpdate }) => (
   <div className="relative group/card shrink-0">
     <img
@@ -96,21 +33,22 @@ const MovieCard = ({ src, alt, onDelete, onUpdate }) => (
       onError={(e) => {
         e.target.onerror = null;
         e.target.src =
-          "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='110' height='160' viewBox='0 0 110 160'><rect width='110' height='160' fill='%2327272a'/><text x='50%27 y='50%27 font-size='10' fill='%2371717a' font-family='sans-serif' text-anchor='middle' alignment-baseline='middle'>Image Missing</text></svg>";
+          "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='110' height='160' viewBox='0 0 110 160'><rect width='110' height='160' fill='%2327272a'/><text x='50%' y='50%' font-size='10' fill='%2371717a' font-family='sans-serif' text-anchor='middle' alignment-baseline='middle'>Image Missing</text></svg>";
       }}
     />
     <div className="absolute top-1 right-1 hidden group-hover/card:flex gap-1">
-      <button onClick={onUpdate} className="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded">
+      <button onClick={onUpdate} className="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded cursor-pointer" title="Edit Judul">
         ✎
       </button>
-      <button onClick={onDelete} className="bg-red-600 text-white text-xs px-1.5 py-0.5 rounded">
+      <button onClick={onDelete} className="bg-red-600 text-white text-xs px-1.5 py-0.5 rounded cursor-pointer" title="Hapus Film">
         ✕
       </button>
     </div>
   </div>
 );
 
-const MovieSection = ({ title, items, scrollable, sectionId, onDelete, onUpdate }) => {
+// --- KOMPONEN MOVIE SECTION ---
+const MovieSection = ({ title, items, onDelete, onUpdate }) => {
   const scrollRef = useRef(null);
 
   const scroll = (dir) => {
@@ -124,82 +62,125 @@ const MovieSection = ({ title, items, scrollable, sectionId, onDelete, onUpdate 
       <h2 className="font-bold text-xl md:text-2xl mb-4 text-zinc-100">{title}</h2>
 
       <div className="relative group">
-        {scrollable && (
-          <button
-            onClick={() => scroll(-1)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/70 hover:bg-black/90 text-white w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity -translate-x-3 cursor-pointer shadow-lg"
-          >
-            ‹
-          </button>
-        )}
+        <button
+          onClick={() => scroll(-1)}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/70 hover:bg-black/90 text-white w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity -translate-x-3 cursor-pointer shadow-lg"
+        >
+          ‹
+        </button>
 
         <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-3 scrollbar-none" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
           {items.map((item) => (
-            <MovieCard key={item.id} src={item.src} alt={item.alt} onDelete={() => onDelete(sectionId, item.id)} onUpdate={() => onUpdate(sectionId, item.id, { alt: "Judul Baru" })} />
+            <MovieCard
+              key={item.id}
+              // Mengakomodasi property dari API (poster_path & title)
+              src={item.poster_path || item.src}
+              alt={item.title || item.alt}
+              onDelete={() => onDelete(item.id)}
+              onUpdate={() => onUpdate(item.id)}
+            />
           ))}
         </div>
 
-        {scrollable && (
-          <button
-            onClick={() => scroll(1)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/70 hover:bg-black/90 text-white w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity translate-x-3 cursor-pointer shadow-lg"
-          >
-            ›
-          </button>
-        )}
+        <button
+          onClick={() => scroll(1)}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/70 hover:bg-black/90 text-white w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity translate-x-3 cursor-pointer shadow-lg"
+        >
+          ›
+        </button>
       </div>
     </section>
   );
 };
 
-const Home = () => {
+// --- KOMPONEN UTAMA HOME ---
+export default function Home() {
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [muted, setMuted] = useState(true);
-  const [sections, setSections] = useState(SECTIONS);
+  const [quickTitle, setQuickTitle] = useState("");
 
-  //Add
-  const handleAddMovie = (sectionId, newMovie) => {
-    const copySections = [...sections];
-    const targetSection = copySections.find((sec) => sec.id === sectionId);
-    if (targetSection) {
-      const filmBaruLengkap = {
-        id: Date.now(),
-        src: newMovie.src,
-        alt: newMovie.alt,
-      };
-      targetSection.items.push(filmBaruLengkap);
-    }
-    setSections(copySections);
-  };
-
-  //Delete
-  const handleDeleteMovie = (sectionId, movieId) => {
-    const copySections = [...sections];
-    const targetSection = copySections.find((sec) => sec.id === sectionId);
-    if (targetSection) {
-      const filmSisa = targetSection.items.filter((item) => item.id !== movieId);
-      targetSection.items = filmSisa;
-    }
-    setSections(copySections);
-  };
-
-  //Update
-  const handleUpdateMovie = (sectionId, movieId, updatedData) => {
-    const copySections = [...sections];
-    const targetSection = copySections.find((rak) => rak.id === sectionId);
-    if (targetSection) {
-      const targetMovie = targetSection.items.find((film) => film.id === movieId);
-      if (targetMovie) {
-        Object.assign(targetMovie, updatedData);
-      }
-    }
-    setSections(copySections);
-  };
-
+  // 1. Load Data dari MockAPI saat halaman dimuat
   useEffect(() => {
+    fetchMoviesData();
     const status = localStorage.getItem("isLoggedIn");
     setIsLoggedIn(status === "true");
   }, []);
+
+  const fetchMoviesData = async () => {
+    try {
+      setLoading(true);
+      const data = await getMovies();
+      setMovies(data);
+    } catch (error) {
+      console.error("Gagal mengambil data film:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 2. Handler POST (Tambah Film Ke MockAPI)
+  const handleAddMovie = async (category) => {
+    if (!quickTitle.trim()) return;
+
+    try {
+      const newMovie = {
+        title: quickTitle,
+        poster_path: "/images/suzume.jpg", // Gambar default untuk tes
+        category: category,
+      };
+
+      const addedData = await addMovie(newMovie);
+      setMovies((prev) => [...prev, addedData]);
+      setQuickTitle(""); // Clear input
+    } catch (error) {
+      console.error("Gagal menambah film:", error);
+    }
+  };
+
+  // 3. Handler DELETE (Hapus Film dari MockAPI)
+  const handleDeleteMovie = async (id) => {
+    try {
+      await deleteMovie(id);
+      setMovies((prev) => prev.filter((movie) => movie.id !== id));
+    } catch (error) {
+      console.error("Gagal menghapus film:", error);
+    }
+  };
+
+  // 4. Handler PUT (Update Judul Film di MockAPI)
+  const handleUpdateMovie = async (id) => {
+    const newTitle = prompt("Masukkan Judul Baru Film:");
+    if (!newTitle) return;
+
+    try {
+      const currentMovie = movies.find((m) => m.id === id);
+      if (!currentMovie) return;
+
+      const updatedData = { ...currentMovie, title: newTitle };
+      const response = await updateMovie(id, updatedData);
+
+      setMovies((prev) => prev.map((movie) => (movie.id === id ? response : movie)));
+    } catch (error) {
+      console.error("Gagal mengupdate film:", error);
+    }
+  };
+
+  const sectionCategories = [
+    { id: "melanjutkan", title: "Melanjutkan Menonton" },
+    { id: "top-rating", title: "Top Rating Film dan Series Hari ini" },
+    { id: "trending", title: "Film Trending" },
+    { id: "rilis", title: "Rilis Baru" },
+  ];
+
+  if (loading) {
+    return (
+      <div className="bg-[#181a1c] min-h-screen text-white flex items-center justify-center">
+        <p className="animate-pulse">Loading data film dari API...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#181a1c] min-h-screen text-white font-sans overflow-x-hidden">
@@ -207,6 +188,7 @@ const Home = () => {
 
       {isLoggedIn ? (
         <>
+          {/* HERO BANNER */}
           <header className="relative w-full overflow-hidden" style={{ height: "clamp(400px, 65vh, 650px)" }}>
             <img
               src={HIGHLIGHT.bg}
@@ -262,31 +244,35 @@ const Home = () => {
             </div>
           </header>
 
+          {/* MAIN CONTENT (DYNAMIC FROM API) */}
           <main className="px-6 md:px-16 pt-4 pb-12 relative z-20">
+            {/* Form Quick Add */}
             <div className="mb-6 p-4 bg-zinc-900 rounded-lg max-w-sm border border-zinc-800">
               <h3 className="text-sm font-semibold mb-2">Tambah Film Cepat (Melanjutkan Menonton)</h3>
               <div className="flex gap-2">
-                <input type="text" id="quick-add-input" placeholder="Ketik judul film..." className="bg-zinc-800 text-sm px-3 py-1.5 rounded text-white flex-1 outline-none border border-zinc-700" />
-                <button
-                  onClick={() => {
-                    const input = document.getElementById("quick-add-input");
-                    if (input && input.value.trim()) {
-                      handleAddMovie("melanjutkan", { alt: input.value });
-                      input.value = ""; // Reset kolom input
-                    }
-                  }}
-                  className="bg-[#3254ff] text-xs px-4 py-1.5 rounded font-semibold"
-                >
+                <input
+                  type="text"
+                  value={quickTitle}
+                  onChange={(e) => setQuickTitle(e.target.value)}
+                  placeholder="Ketik judul film..."
+                  className="bg-zinc-800 text-sm px-3 py-1.5 rounded text-white flex-1 outline-none border border-zinc-700"
+                />
+                <button onClick={() => handleAddMovie("melanjutkan")} className="bg-[#3254ff] hover:bg-[#4a6cff] text-xs px-4 py-1.5 rounded font-semibold transition-colors cursor-pointer">
                   Tambah
                 </button>
               </div>
             </div>
-            {sections.map((section) => (
-              <MovieSection key={section.id} title={section.title} items={section.items} scrollable={section.scrollable} sectionId={section.id} onDelete={handleDeleteMovie} onUpdate={handleUpdateMovie} />
-            ))}
+
+            {/* Dynamic Movie Sections */}
+            {sectionCategories.map((sec) => {
+              const filtered = movies.filter((m) => m.category === sec.id);
+
+              return <MovieSection key={sec.id} title={sec.title} items={filtered} onDelete={handleDeleteMovie} onUpdate={handleUpdateMovie} />;
+            })}
           </main>
         </>
       ) : (
+        /* LANDING PAGE JIKA BELUM LOGIN */
         <div className="flex flex-col items-center justify-center min-h-[80vh] px-6 text-center max-w-3xl mx-auto animate-fadeIn">
           <h1 className="text-3xl md:text-5xl font-extrabold mb-4 leading-tight">Tonton Film, Series, & Anime Sepuasnya Tanpa Batas.</h1>
           <p className="text-zinc-400 text-base md:text-lg mb-8 max-w-xl">Mulai dari Rp30.000/bulan. Bisa dibatalkan kapan saja. Siap menonton? Masuk ke akunmu sekarang.</p>
@@ -296,6 +282,7 @@ const Home = () => {
         </div>
       )}
 
+      {/* FOOTER */}
       <footer className="bg-[#121415] border-t border-zinc-900 mt-auto">
         <div className="px-6 md:px-16 py-12 flex flex-col md:flex-row justify-between gap-10 max-w-7xl mx-auto">
           <div>
@@ -338,6 +325,4 @@ const Home = () => {
       </footer>
     </div>
   );
-};
-
-export default Home;
+}
